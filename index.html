@@ -22,24 +22,27 @@
       justify-content: center;
       padding: 10px;
       min-height: 100vh;
+      overflow: hidden;
+      position: relative;
     }
 
     .page {
+      position: absolute;
       width: 100%;
       max-width: 600px;
       aspect-ratio: 3 / 4;
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
-      margin: 0 auto;
-      transition: background-image 0.5s ease;
+      transition: transform 0.5s ease, opacity 0.5s ease;
     }
 
     .controls {
-      margin-top: 15px;
+      margin-top: 500px; /* ini memberi jarak vertikal dari atas ke bawah */
       text-align: center;
       z-index: 10;
       width: 100%;
+      position: relative;
     }
 
     button {
@@ -68,17 +71,23 @@
         margin: 8px auto;
         display: block;
       }
+
+      .controls {
+        margin-top: 400px;
+      }
     }
   </style>
 </head>
 <body>
 
 <div id="flipbook">
-  <div class="page" id="singlePage"></div>
+  <div class="page" id="currentPage"></div>
+  <div class="page" id="nextPage"></div>
 
+  <!-- Kontrol dipindahkan ke bawah -->
   <div class="controls">
-    <button onclick="prevPage()">⬅️ Halaman Sebelumnya</button>
-    <button onclick="nextPage()">Halaman Berikutnya ➡️</button>
+    <button onclick="prevPageFunc()">⬅️ Halaman Sebelumnya</button>
+    <button onclick="nextPageFunc()">Halaman Berikutnya ➡️</button>
   </div>
 </div>
 
@@ -87,31 +96,55 @@
 <script>
   const totalPages = 30;
   let currentIndex = 0;
-  const singlePage = document.getElementById('singlePage');
+
+  const currentPage = document.getElementById('currentPage');
+  const nextPage = document.getElementById('nextPage');
   const flipSound = document.getElementById('flip-sound');
 
-  function renderPage(index) {
+  function renderPage(index, direction = 'next') {
     if (index < 0 || index >= totalPages) return;
-    singlePage.style.backgroundImage = `url('${index + 1}.png')`;
+
+    nextPage.style.backgroundImage = `url('${index + 1}.png')`;
+    nextPage.style.opacity = '1';
+    nextPage.style.transform = `translateX(${direction === 'next' ? '100%' : '-100%'})`;
+
+    setTimeout(() => {
+      nextPage.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+      nextPage.style.transform = 'translateX(0)';
+      currentPage.style.transform = `translateX(${direction === 'next' ? '-100%' : '100%'})`;
+      currentPage.style.opacity = '0';
+    }, 10);
+
+    setTimeout(() => {
+      currentPage.style.transition = 'none';
+      currentPage.style.backgroundImage = `url('${index + 1}.png')`;
+      currentPage.style.transform = 'translateX(0)';
+      currentPage.style.opacity = '1';
+
+      nextPage.style.transition = 'none';
+      nextPage.style.transform = 'translateX(100%)';
+      nextPage.style.opacity = '0';
+    }, 600);
   }
 
-  function nextPage() {
+  function nextPageFunc() {
     if (currentIndex < totalPages - 1) {
       currentIndex++;
-      renderPage(currentIndex);
+      renderPage(currentIndex, 'next');
       flipSound.play();
     }
   }
 
-  function prevPage() {
+  function prevPageFunc() {
     if (currentIndex > 0) {
       currentIndex--;
-      renderPage(currentIndex);
+      renderPage(currentIndex, 'prev');
       flipSound.play();
     }
   }
 
-  renderPage(currentIndex);
+  // Initial render
+  currentPage.style.backgroundImage = `url('1.png')`;
 </script>
 
 </body>
