@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Nomor Extention Asrama</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background-color: #000;
+      font-family: sans-serif;
+    }
+
+    #flipbook {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .page {
+      position: absolute;
+      width: 100%;
+      max-width: 600px;
+      aspect-ratio: 3 / 4;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+
+    .controls {
+      margin-top: 500px; /* ini memberi jarak vertikal dari atas ke bawah */
+      text-align: center;
+      z-index: 10;
+      width: 100%;
+      position: relative;
+    }
+
+    button {
+      padding: 10px 18px;
+      margin: 5px;
+      font-size: 16px;
+      border: none;
+      background: #ffffff88;
+      color: #000;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #ffffffcc;
+    }
+
+    @media (max-width: 768px) {
+      .page {
+        max-width: 100%;
+        aspect-ratio: 3 / 4;
+      }
+
+      button {
+        width: 90%;
+        margin: 8px auto;
+        display: block;
+      }
+
+      .controls {
+        margin-top: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="flipbook">
+  <div class="page" id="currentPage"></div>
+  <div class="page" id="nextPage"></div>
+
+  <!-- Kontrol dipindahkan ke bawah -->
+  <div class="controls">
+    <button onclick="prevPageFunc()">⬅️ Halaman Sebelumnya</button>
+    <button onclick="nextPageFunc()">Halaman Berikutnya ➡️</button>
+  </div>
+</div>
+
+<audio id="flip-sound" src="https://www.soundjay.com/misc/sounds/page-flip-4.mp3" preload="auto"></audio>
+
+<script>
+  const totalPages = 30;
+  let currentIndex = 0;
+
+  const currentPage = document.getElementById('currentPage');
+  const nextPage = document.getElementById('nextPage');
+  const flipSound = document.getElementById('flip-sound');
+
+  function renderPage(index, direction = 'next') {
+    if (index < 0 || index >= totalPages) return;
+
+    nextPage.style.backgroundImage = `url('${index + 1}.png')`;
+    nextPage.style.opacity = '1';
+    nextPage.style.transform = `translateX(${direction === 'next' ? '100%' : '-100%'})`;
+
+    setTimeout(() => {
+      nextPage.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+      nextPage.style.transform = 'translateX(0)';
+      currentPage.style.transform = `translateX(${direction === 'next' ? '-100%' : '100%'})`;
+      currentPage.style.opacity = '0';
+    }, 10);
+
+    setTimeout(() => {
+      currentPage.style.transition = 'none';
+      currentPage.style.backgroundImage = `url('${index + 1}.png')`;
+      currentPage.style.transform = 'translateX(0)';
+      currentPage.style.opacity = '1';
+
+      nextPage.style.transition = 'none';
+      nextPage.style.transform = 'translateX(100%)';
+      nextPage.style.opacity = '0';
+    }, 600);
+  }
+
+  function nextPageFunc() {
+    if (currentIndex < totalPages - 1) {
+      currentIndex++;
+      renderPage(currentIndex, 'next');
+      flipSound.play();
+    }
+  }
+
+  function prevPageFunc() {
+    if (currentIndex > 0) {
+      currentIndex--;
+      renderPage(currentIndex, 'prev');
+      flipSound.play();
+    }
+  }
+
+  // Initial render
+  currentPage.style.backgroundImage = `url('1.png')`;
+</script>
+
+</body>
+</html>
